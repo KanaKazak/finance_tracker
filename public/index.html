@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance Tracker - Chart</title>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            color: #333;
+        }
+
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        input, select, button {
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            margin-top: 5px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            border: none;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        #piechart_3d {
+            margin: 0 auto;
+        }
+
+        #transactions {
+            margin-top: 20px;
+        }
+
+        #transactions ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        #transactions li {
+            background-color: #f9f9f9;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                width: 90%;
+            }
+
+            h1 {
+                font-size: 20px;
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Finance Tracker - Expense Breakdown</h1>
+
+    <div class="container">
+        <!-- Form to add a new transaction -->
+        <h2>Add Transaction</h2>
+        <form id="transactionForm">
+            <label for="amount">Amount:</label>
+            <input type="number" id="amount" name="amount" step="0.01" required>
+
+            <label for="type">Type:</label>
+            <select id="type" name="type" required>
+                <option value="income">Income</option>
+                <option value="expense">Expense</option>
+            </select>
+            
+            <label for="category">Category:</label>
+            <select id="category" name="category" required></select>
+            
+            
+
+            <button type="submit">Add Transaction</button>
+        </form>
+
+        <!-- Div to display the Google Chart -->
+        <div id="piechart_3d" style="width: 100%; height: 500px;"></div>
+
+        <!-- Div to display the transactions list -->
+        <h2>Transactions</h2>
+        <div id="transactions"></div>
+        <button id="purgeButton">Purge Transactions</button>
+    </div>
+
+    <!-- Script to load and draw the Google Chart -->
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const incomeCategories = ['Salary', 'Investment', 'Debt'];
+            const expenseCategories = ['Food', 'Transportation', 'Utilities', 'Entertainment', 'Healthcare', 'Other'];
+            const typeSelect = document.getElementById('type');
+            const categorySelect = document.getElementById('category');
+            const transactionForm = document.getElementById('transactionForm');
+            const transactionsDiv = document.getElementById('transactions');
+            const purgeButton = document.getElementById('purgeButton');
+    
+            // Function to fetch transactions from the server
+            async function fetchTransactions() {
+                try {
+                    const response = await fetch('/transactions');
+                    if (!response.ok) throw new Error('Failed to fetch transactions');
+                    const transactions = await response.json();
+                    displayTransactions(transactions);
+                    drawChart(transactions);
+                } catch (error) {
+                    console.error('Error fetching transactions:', error);
+                }
+            }
+    
+            // Function to display transactions
+            function displayTransactions(transactions) {
+                transactionsDiv.innerHTML = '<ul>' +
+                    transactions.map(({ amount, type, category, date }) =>
+                        `<li>${type === 'income' ? '+' : '-'}$${parseFloat(amount).toFixed(2)} (${category}) on ${new Date(date).toLocaleDateString()}</li>`).join('') +
+                    '</ul>';
+            }
+    
+            // Function to draw the chart
+            function drawChart(transactions) {
+                const chartData = [['Category', 'Amount']];
+                const groupedData = transactions.reduce((acc, { category, amount }) => {
+                    acc[category] = (acc[category] || 0) + parseFloat(amount);
+                    return acc;
+                }, {});
+    
+                for (const [category, amount] of Object.entries(groupedData)) {
+                    chartData.push([category, Math.abs(amount)]);
+                }
+    
+                const data = google.visualization.arrayToDataTable(chartData);
+    
+                const options = {
+                    title: 'Expense Breakdown',
+                    is3D: true,
+                };
+    
+                const chart = new google.visualization.PieChart(document.getElementById('piechart_3d'));
+                chart.draw(data, options);
+            }
+    
+            // Function to add a new transaction
+            async function addTransaction(transaction) {
+                try {
+                    const response = await fetch('/addTransaction', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(transaction),
+                    });
+                    if (!response.ok) throw new Error('Failed to add transaction');
+                    alert('Transaction added successfully!');
+                    await fetchTransactions();
+                } catch (error) {
+                    console.error('Error adding transaction:', error);
+                }
+            }
+    
+            // Function to purge all transactions
+            async function purgeTransactions() {
+                try {
+                    const response = await fetch('/purgeTransactions', { method: 'DELETE' });
+                    if (!response.ok) throw new Error('Failed to purge transactions');
+                    alert('All transactions purged!');
+                    await fetchTransactions();
+                } catch (error) {
+                    console.error('Error purging transactions:', error);
+                }
+            }
+    
+            // Event listener for form submission
+            transactionForm.addEventListener('submit', (event) => {
+                event.preventDefault();
+                const amount = parseFloat(document.getElementById('amount').value);
+                const type = document.getElementById('type').value;
+                const category = document.getElementById('category').value;
+                const userId = 1; // Replace with actual user ID in a real app
+                addTransaction({ user_id: userId, type, amount, category });
+                transactionForm.reset();
+                updateCategories(); // Reset categories to default
+            });
+    
+            // Event listener for purge button
+            purgeButton.addEventListener('click', purgeTransactions);
+    
+            // Function to update categories dynamically
+            function updateCategories() {
+                const selectedType = typeSelect.value;
+                const categories = selectedType === 'income' ? incomeCategories : expenseCategories;
+    
+                // Clear previous options
+                categorySelect.innerHTML = '';
+    
+                // Populate category dropdown
+                categories.forEach(cat => {
+                    const option = document.createElement('option');
+                    option.value = cat;
+                    option.textContent = cat;
+                    categorySelect.appendChild(option);
+                });
+            }
+    
+            // Load Google Charts and initialize
+            google.charts.load('current', { packages: ['corechart'] });
+            google.charts.setOnLoadCallback(() => {
+                fetchTransactions(); // Fetch data and draw the initial chart
+            });
+    
+            // Initialize categories
+            updateCategories();
+            typeSelect.addEventListener('change', updateCategories);
+        });
+    </script>
+    
+    
+</body>
+</html>
