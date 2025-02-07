@@ -128,7 +128,6 @@ function drawChart(transactions) {
     chart.draw(data, options);
 }
 
-
 function displayStats(transactions) {
     const totalIncome = transactions
         .filter(t => t.type === 'income')

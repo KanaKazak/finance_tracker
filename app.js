@@ -4,18 +4,15 @@ const bodyParser = require('body-parser'); // Middleware for parsing JSON
 const app = express(); // Initialize the Express app
 const port = 3000; // Port number for the server
 
-// Database connection
-const db = mysql.createConnection({
+// Database connection pool
+const db = mysql.createPool({
     host: 'bedvzepnvku1yrxawkm5-mysql.services.clever-cloud.com',
     user: 'udawyatuymguyrxd',
     password: 'y6RgvXsBpctiK0ZSwdx6',
-    database: 'bedvzepnvku1yrxawkm5'
-});
-
-// Connect to the database
-db.connect(err => {
-    if (err) throw err;
-    console.log('Connected to the Clever Cloud database.');
+    database: 'bedvzepnvku1yrxawkm5',
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
 });
 
 // Middleware
