@@ -1,14 +1,14 @@
 {
   "name": "finance-tracker",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "main": "script.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
+  "author": "KazaKazak",
   "license": "ISC",
-  "description": "",
+  "description": "Finance tracker for personal use.",
   "dependencies": {
     "body-parser": "^1.20.3",
     "express": "^4.21.2",
