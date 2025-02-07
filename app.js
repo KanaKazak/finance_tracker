@@ -22,9 +22,20 @@ db.connect(err => {
 app.use(bodyParser.json());
 app.use(express.static('public')); // Serve files in the "public" folder
 
-// API route to get transactions
+// API route to get transactions with optional date filters
 app.get('/transactions', (req, res) => {
-    db.query('SELECT * FROM transactions ORDER BY date DESC', (err, results) => {
+    const { startDate, endDate } = req.query;
+    let query = 'SELECT * FROM transactions';
+    const queryParams = [];
+
+    if (startDate && endDate) {
+        query += ' WHERE date >= ? AND date <= DATE_ADD(?, INTERVAL 1 DAY)';
+        queryParams.push(startDate, endDate);
+    }
+
+    query += ' ORDER BY date DESC';
+
+    db.query(query, queryParams, (err, results) => {
         if (err) {
             console.error('Error fetching transactions:', err);
             res.status(500).send('Failed to fetch transactions');
@@ -36,11 +47,11 @@ app.get('/transactions', (req, res) => {
 
 // API route to add a transaction
 app.post('/addTransaction', (req, res) => {
-    const { user_id, type, amount, category } = req.body;
+    const { user_id, type, amount, category, description } = req.body; // Include description
     console.log('Received data:', req.body); // Log received data
 
-    const query = 'INSERT INTO transactions (user_id, type, amount, category) VALUES (?, ?, ?, ?)';
-    db.query(query, [user_id, type, amount, category], (err) => {
+    const query = 'INSERT INTO transactions (user_id, type, amount, category, description) VALUES (?, ?, ?, ?, ?)'; // Update query
+    db.query(query, [user_id, type, amount, category, description], (err) => { // Include description
         if (err) {
             console.error('Database insertion error:', err); // Log DB errors
             return res.status(500).send('Database error');
@@ -50,11 +61,16 @@ app.post('/addTransaction', (req, res) => {
     });
 });
 
-// Route to purge all transactions (DELETE)
-app.delete('/purgeTransactions', (req, res) => {
-    db.query('DELETE FROM transactions', (err, results) => {
-        if (err) throw err;
-        res.send('All transactions have been purged.');
+// API route to purge the database
+app.post('/purgeDatabase', (req, res) => {
+    const query = 'DELETE FROM transactions';
+    db.query(query, (err) => {
+        if (err) {
+            console.error('Database purge error:', err);
+            return res.status(500).send('Database purge error');
+        }
+        console.log('Database purged.');
+        res.send('Database purged');
     });
 });
 

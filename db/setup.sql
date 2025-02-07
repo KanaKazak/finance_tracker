@@ -8,5 +8,6 @@ CREATE TABLE transactions (
     type ENUM('income', 'expense'),
     amount DECIMAL(10, 2),
     category VARCHAR(255),
+    description TEXT,  -- Add this line
     date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

@@ -5,32 +5,67 @@ body {
     padding: 0;
 }
 
-.container {
-    width: 80%;
-    margin: 0 auto;
-    padding: 20px;
+h1 {
+    background-color: #4CAF50;
+    color: white;
+    text-align: center;
+    padding: 15px;
+    margin-bottom: 20px;
 }
 
-h1 {
-    text-align: center;
+h2 {
     color: #333;
+}
+
+.container {
+    width: 80%;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: white;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    margin-bottom: 20px;
 }
 
 form {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    gap: 10px;
 }
 
-form input, form select, form button {
-    margin: 10px;
+label {
+    margin-bottom: 5px;
+}
+
+input, select, button {
     padding: 10px;
-    width: 200px;
-    font-size: 16px;
+    margin-bottom: 10px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
-#transactions {
-    margin-top: 20px;
+button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+.secondary-button {
+    background-color: #f44336; /* Red color for secondary button */
+    color: white;
+    border: none;
+    cursor: pointer;
+    margin-top: 20px; /* Add some margin to separate it from other content */
+}
+
+.secondary-button:hover {
+    background-color: #e53935;
 }
 
 #transactions ul {
@@ -39,14 +74,15 @@ form input, form select, form button {
 }
 
 #transactions li {
-    padding: 5px;
-    background-color: #fff;
-    margin-bottom: 5px;
+    background: #f9f9f9;
+    margin: 5px 0;
+    padding: 10px;
     border: 1px solid #ddd;
 }
 
-h2 {
-    color: #333;
-    margin-top: 30px;
-    text-align: center;
+#piechart_3d {
+    width: 100%;
+    max-width: 600px;
+    height: 400px;
+    margin: 0 auto;
 }

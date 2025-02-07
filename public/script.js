@@ -93,11 +93,12 @@ document.getElementById('transactionForm').addEventListener('submit', async (e) 
     const type = document.getElementById('type').value;
     const amount = document.getElementById('amount').value;
     const category = document.getElementById('category').value;
+    const description = document.getElementById('description').value; // Get description
 
     const response = await fetch('/addTransaction', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id, type, amount, category })
+        body: JSON.stringify({ user_id, type, amount, category, description }) // Include description
     });
 
     if (response.ok) {
@@ -107,6 +108,12 @@ document.getElementById('transactionForm').addEventListener('submit', async (e) 
         alert('Failed to add transaction.');
     }
 });
+
+// Display transactions on the page
+const transactionsList = document.getElementById('transactions');
+transactionsList.innerHTML = '<ul>' + transactions.map(t =>
+    `<li>${t.type} of $${t.amount} for ${t.category} on ${new Date(t.date).toLocaleDateString()} - ${t.description}</li>` // Include description
+).join('') + '</ul>';
 
 // Load transactions on page load
 window.onload = loadTransactions;
