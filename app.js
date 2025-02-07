@@ -45,6 +45,20 @@ app.get('/transactions', (req, res) => {
     });
 });
 
+// API route to get a single transaction
+app.get('/transaction/:id', (req, res) => {
+    const { id } = req.params;
+    const query = 'SELECT * FROM transactions WHERE id = ?';
+    db.query(query, [id], (err, results) => {
+        if (err) {
+            console.error('Error fetching transaction:', err);
+            res.status(500).send('Failed to fetch transaction');
+            return;
+        }
+        res.json(results[0]);
+    });
+});
+
 // API route to add a transaction
 app.post('/addTransaction', (req, res) => {
     const { user_id, type, amount, category, description } = req.body; // Include description
@@ -58,6 +72,35 @@ app.post('/addTransaction', (req, res) => {
         }
         console.log('Transaction added to the database.'); // Confirm insertion
         res.send('Transaction added!');
+    });
+});
+
+// API route to update a transaction
+app.put('/updateTransaction/:id', (req, res) => {
+    const { id } = req.params;
+    const { user_id, type, amount, category, description } = req.body;
+    const query = 'UPDATE transactions SET user_id = ?, type = ?, amount = ?, category = ?, description = ? WHERE id = ?';
+    db.query(query, [user_id, type, amount, category, description, id], (err) => {
+        if (err) {
+            console.error('Database update error:', err);
+            return res.status(500).send('Database update error');
+        }
+        console.log('Transaction updated in the database.');
+        res.send('Transaction updated!');
+    });
+});
+
+// API route to delete a transaction
+app.delete('/deleteTransaction/:id', (req, res) => {
+    const { id } = req.params;
+    const query = 'DELETE FROM transactions WHERE id = ?';
+    db.query(query, [id], (err) => {
+        if (err) {
+            console.error('Database deletion error:', err);
+            return res.status(500).send('Database deletion error');
+        }
+        console.log('Transaction deleted from the database.');
+        res.send('Transaction deleted!');
     });
 });
 
