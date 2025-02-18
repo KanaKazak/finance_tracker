@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const express = require('express'); // Framework for building web servers
 const mysql = require('mysql2'); // MySQL library for Node.js
 const bodyParser = require('body-parser'); // Middleware for parsing JSON
@@ -6,10 +8,10 @@ const port = 3000; // Port number for the server
 
 // Database connection pool
 const db = mysql.createPool({
-    host: 'bedvzepnvku1yrxawkm5-mysql.services.clever-cloud.com',
-    user: 'udawyatuymguyrxd',
-    password: 'y6RgvXsBpctiK0ZSwdx6',
-    database: 'bedvzepnvku1yrxawkm5',
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0
