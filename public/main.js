@@ -1,5 +1,5 @@
 const incomeCategories = ['Salary', 'Investments', 'Gifts', 'Other'];
-const expenseCategories = ['Food', 'Prepared Food', 'Transportation Public', 'Transportation Taxi', 'Utilities', 'Entertainment', 'Healthcare', 'Indulgancies', 'Clothes', 'Other'];
+const expenseCategories = ['Food', 'Prepared Food', 'Transportation Public', 'Transportation Taxi', 'Utilities', 'Entertainment', 'Healthcare', 'Indulgancies', 'Clothes', 'Other', 'Bank credit'];
 
 function updateCategories() {
     const typeSelect = document.getElementById('type');
@@ -96,10 +96,12 @@ function displayTransactions(transactions) {
 
 function drawChart(transactions) {
     const chartData = [['Category', 'Amount']];
-    const groupedData = transactions.reduce((acc, { category, amount }) => {
-        acc[category] = (acc[category] || 0) + parseFloat(amount);
-        return acc;
-    }, {});
+    const groupedData = transactions
+        .filter(t => t.type === 'expense') // Filter out income transactions
+        .reduce((acc, { category, amount }) => {
+            acc[category] = (acc[category] || 0) + parseFloat(amount);
+            return acc;
+        }, {});
 
     for (const [category, amount] of Object.entries(groupedData)) {
         chartData.push([category, Math.abs(amount)]);
